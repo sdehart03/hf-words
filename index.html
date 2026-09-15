@@ -147,7 +147,16 @@
                 "work", "world", "another", "brother", "father", "mother", "during", "learn", "sure", "against", 
                 "break", "eight", "great", "above", "nothing", "people", "been", "carry", "please", "by", 
                 "bye", "type", "because", "busy", "family", "ahead", "around", "away", "early", "heavy", 
-                "instead", "ready"
+                "instead", "ready", "control", "island", "second", "also", "notice", "ocean", "science",
+                "usually", "measure", "minutes", "picture", "police", "certain", "door", "hours", "knew",
+                "new", "too", "down", "found", "how", "now", "our", "book", "stood", "took", "built",
+                "lost", "thought", "won", "patience", "special", "were", "answer", "every", "though",
+                "beautiful", "general", "several", "area", "business", "sign", "guess", "laugh", "through",
+                "change", "language", "large", "orange", "country", "natural", "touch", "watch", "bought",
+                "caught", "wash", "water", "toward", "want", "warm", "eyes", "rhyme", "separate", "since",
+                "anything", "breakfast", "important", "carefully", "experiment", "paragraph", "square", "wear",
+                "different", "seven", "symbol", "system", "choose", "city", "money", "whose", "animal",
+                "enough", "favorite", "column", "cover", "rhythm"
             ];
 
             const cardColors = [
@@ -170,10 +179,23 @@
                 "bg-rose-100 text-rose-800 border-rose-200",
             ];
 
+            const gradeRanges = {
+                all: [0, initialWords.length],
+                kindergarten: [0, 62],
+                firstGrade: [62, 150],
+                secondGrade: [150, 236],
+            };
+
+            const getWordsForGrade = (grade) => {
+                const [start, end] = gradeRanges[grade];
+                return initialWords.slice(start, end);
+            };
+
             const [words, setWords] = useState(initialWords);
             const [currentIndex, setCurrentIndex] = useState(0);
             const [viewMode, setViewMode] = useState('card');
             const [isSpeaking, setIsSpeaking] = useState(false);
+            const [selectedGrade, setSelectedGrade] = useState('all');
 
             const getColor = (index) => cardColors[index % cardColors.length];
 
@@ -209,8 +231,21 @@
             };
 
             const resetOrder = () => {
-                setWords(initialWords);
+                setWords(getWordsForGrade(selectedGrade));
                 setCurrentIndex(0);
+            };
+
+            const handleGradeChange = (event) => {
+                const grade = event.target.value;
+
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                }
+
+                setSelectedGrade(grade);
+                setWords(getWordsForGrade(grade));
+                setCurrentIndex(0);
+                setIsSpeaking(false);
             };
 
             useEffect(() => {
@@ -236,32 +271,51 @@
                 <div className="min-h-screen flex flex-col items-center p-4 font-sans text-slate-800">
                     
                     {/* Header */}
-                    <header className="w-full max-w-2xl flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                        <h1 className="text-3xl font-bold text-slate-700 tracking-tight">Sight Words</h1>
-                        
-                        <div className="flex bg-white p-1 rounded-lg shadow-sm border border-slate-200">
-                            <button
-                                onClick={() => setViewMode('card')}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all ${
-                                    viewMode === 'card' 
-                                        ? 'bg-blue-100 text-blue-700 font-medium' 
-                                        : 'text-slate-500 hover:bg-slate-50'
-                                }`}
+                    <header className="w-full max-w-2xl flex flex-col mb-6 gap-4">
+                        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                            <h1 className="text-3xl font-bold text-slate-700 tracking-tight">Sight Words</h1>
+
+                            <div className="flex bg-white p-1 rounded-lg shadow-sm border border-slate-200">
+                                <button
+                                    onClick={() => setViewMode('card')}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all ${
+                                        viewMode === 'card'
+                                            ? 'bg-blue-100 text-blue-700 font-medium'
+                                            : 'text-slate-500 hover:bg-slate-50'
+                                    }`}
+                                >
+                                    <GridIcon size={18} />
+                                    Cards
+                                </button>
+                                <button
+                                    onClick={() => setViewMode('list')}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all ${
+                                        viewMode === 'list'
+                                            ? 'bg-blue-100 text-blue-700 font-medium'
+                                            : 'text-slate-500 hover:bg-slate-50'
+                                    }`}
+                                >
+                                    <ListIcon size={18} />
+                                    List
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-center sm:justify-end gap-3">
+                            <label htmlFor="grade-filter" className="text-sm font-semibold text-slate-600">
+                                Grade Level
+                            </label>
+                            <select
+                                id="grade-filter"
+                                value={selectedGrade}
+                                onChange={handleGradeChange}
+                                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
                             >
-                                <GridIcon size={18} />
-                                Cards
-                            </button>
-                            <button
-                                onClick={() => setViewMode('list')}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all ${
-                                    viewMode === 'list' 
-                                        ? 'bg-blue-100 text-blue-700 font-medium' 
-                                        : 'text-slate-500 hover:bg-slate-50'
-                                }`}
-                            >
-                                <ListIcon size={18} />
-                                List
-                            </button>
+                                <option value="all">All Words</option>
+                                <option value="kindergarten">Kindergarten</option>
+                                <option value="firstGrade">First Grade</option>
+                                <option value="secondGrade">Second Grade</option>
+                            </select>
                         </div>
                     </header>
 
